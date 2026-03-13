@@ -14,6 +14,19 @@
 ## 2. Documentación
 
 ### 2.1 Descripción del laboratorio
+## Descripción del laboratorio
+
+En este laboratorio se estudió el funcionamiento del sistema de reloj de un microcontrolador PIC, analizando el comportamiento de diferentes configuraciones de oscilador. El objetivo principal fue comparar la estabilidad y precisión de tres tipos de fuentes de reloj: el oscilador interno del microcontrolador (INTOSC), un oscilador externo basado en cristal de cuarzo (modo HS) y un oscilador RC externo.
+
+Para realizar la práctica se desarrolló un programa en lenguaje C utilizando el compilador XC8. El programa configura el microcontrolador para trabajar con distintos modos de oscilación y genera una señal periódica en el pin RC0 mediante la conmutación de un LED cada 500 ms. Esto produce una señal cuadrada de aproximadamente 1 Hz que puede ser medida con instrumentos de laboratorio como un osciloscopio o un frecuencímetro.
+
+Además, cuando se utiliza el oscilador interno, se aprovecha el pin RA6 para observar la señal de reloj dividida del sistema (CLKO), lo que permite medir directamente la frecuencia del oscilador del microcontrolador.
+
+Durante el experimento se realizaron mediciones de frecuencia en dos condiciones diferentes: temperatura ambiente (frío) y temperatura elevada (calor). El propósito de estas mediciones fue observar la deriva de frecuencia y analizar cómo los cambios de temperatura afectan la estabilidad del sistema de reloj.
+
+Finalmente, los resultados obtenidos permiten comparar el desempeño de cada tipo de oscilador. En general, el cristal externo presenta mayor estabilidad y menor error de frecuencia, mientras que el oscilador interno tiene una precisión intermedia y el oscilador RC externo muestra mayor variación debido a la tolerancia de los componentes electrónicos utilizados.
+
+Este laboratorio permite comprender la importancia del sistema de reloj en los sistemas embebidos, ya que la frecuencia del oscilador determina la velocidad de ejecución de las instrucciones del microcontrolador y afecta directamente la precisión temporal de las aplicaciones electrónicas.
 
 ### 2.2 Explicación del código implementado
 
@@ -192,5 +205,82 @@ void main(void) {
 * Si se quisiera duplicar la frecuencia del PIC usando PLL, ¿en qué modos se podría aplicar?
 
 * Enliste ventajas y desventajas de cada modo.
+## Respuestas a las preguntas del laboratorio
 
+### ¿En qué modo se obtuvo la medición más cercana a la frecuencia teórica?
+
+El modo que generalmente presenta la medición más cercana a la frecuencia teórica es el **modo de cristal externo (HS)**. Esto se debe a que los cristales de cuarzo tienen una alta estabilidad y una tolerancia muy baja en comparación con otras fuentes de reloj. Por esta razón, la frecuencia generada por el cristal se mantiene muy cercana al valor nominal especificado (por ejemplo 16 MHz).
+
+En contraste, el oscilador interno del microcontrolador tiene un error de calibración mayor y el oscilador RC externo depende de componentes pasivos cuyas tolerancias pueden variar significativamente.
+
+---
+
+### ¿Fue posible evidenciar el fenómeno de deriva? ¿Qué factores podrían explicar la variación de frecuencia al calentar el PIC?
+
+Sí, durante el experimento es posible evidenciar el fenómeno de **deriva de frecuencia**, especialmente cuando se incrementa la temperatura del dispositivo.
+
+La deriva ocurre porque la frecuencia del oscilador depende de parámetros físicos que cambian con la temperatura. Entre los factores que pueden causar esta variación se encuentran:
+
+- Cambios en las propiedades eléctricas del silicio del microcontrolador.
+- Variaciones en la resistencia y capacitancia de los componentes del oscilador RC.
+- Sensibilidad térmica del oscilador interno.
+- Expansión térmica del cristal o de los materiales del encapsulado.
+
+En general, el oscilador RC es el más sensible a estos cambios, mientras que el cristal externo presenta mayor estabilidad térmica.
+
+---
+
+### ¿Cuál es más preciso en cuanto a frecuencia teórica vs. medida?
+
+El **oscilador con cristal externo** es el más preciso en cuanto a la relación entre frecuencia teórica y frecuencia medida.
+
+Esto se debe a que los cristales de cuarzo están diseñados específicamente para mantener una frecuencia muy estable y presentan errores típicos del orden de **decenas de ppm (partes por millón)**.
+
+El oscilador interno del microcontrolador es menos preciso porque depende de calibraciones internas del fabricante, mientras que el oscilador RC externo puede presentar errores aún mayores debido a la tolerancia de los componentes electrónicos utilizados.
+
+---
+
+### Explique cómo usar RC0 para estimar la frecuencia del oscilador cuando RA6 no está disponible.
+
+Cuando el pin RA6 no está disponible (por ejemplo cuando se utiliza un cristal externo), es posible estimar indirectamente la frecuencia del oscilador utilizando la señal generada en el pin RC0.
+
+En el programa, el pin RC0 cambia de estado cada 500 ms, generando una señal cuadrada con un período aproximado de 1 segundo (1 Hz). Este período depende directamente de los retardos generados por la función `delay_ms()`, los cuales están calculados a partir de la frecuencia definida en `_XTAL_FREQ`.
+
+Si se mide la frecuencia real de la señal en RC0 utilizando un osciloscopio o frecuencímetro, se puede comparar con la frecuencia teórica esperada. Si existe una diferencia entre ambas, esta diferencia indica que la frecuencia real del oscilador no coincide exactamente con la frecuencia definida en el programa.
+
+De esta manera, la señal en RC0 permite estimar indirectamente el error del oscilador del sistema.
+
+---
+
+### Si se quisiera duplicar la frecuencia del PIC usando PLL, ¿en qué modos se podría aplicar?
+
+El **PLL (Phase Locked Loop)** permite multiplicar la frecuencia base del oscilador del microcontrolador.
+
+Dependiendo del modelo de PIC, el PLL puede aplicarse en:
+
+- **Modo de oscilador interno (INTOSC)**  
+- **Modo de cristal externo (HS)**
+
+En ambos casos, el PLL puede multiplicar la frecuencia del oscilador, por ejemplo de **16 MHz a 64 MHz** (multiplicación x4).
+
+En el caso del **oscilador RC externo**, generalmente el PLL no se utiliza debido a la baja estabilidad de este tipo de oscilador.
+
+---
+
+### Ventajas y desventajas de cada modo
+
+| Modo de oscilador | Ventajas | Desventajas |
+|------------------|----------|-------------|
+| Oscilador interno (INTOSC) | No requiere componentes externos, bajo costo, fácil configuración | Menor precisión y mayor deriva térmica |
+| Cristal externo (HS) | Alta estabilidad, alta precisión, baja deriva de frecuencia | Requiere componentes externos y mayor costo |
+| RC externo | Implementación sencilla y económica | Baja estabilidad, alta variación por temperatura y tolerancias |
+
+---
 ## 5. Referencias
+
+## Referencias
+
+1. Datasheet del microcontrolador PIC utilizado en la práctica.
+2. Manual del compilador XC8.
+3. Documentación de microcontroladores de Microchip.
+4. Notas de clase del laboratorio de sistemas embebidos.
